@@ -222,12 +222,39 @@ def serviceSummary(keys,servicelist=None):
             fprint = host_key_select[addr]['ports'][port]['application']
             protocol = host_key_select[addr]['ports'][port]['protocol']
             if servicelist:
-                if service in servicelist:
-                    print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:20}'.format(addr,port,protocol,service,fprint)
+                for serv in servicelist:
+                    if serv == service:
+                        print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:20}'.format(addr,port,protocol,service,' '.join(fprint))
+                    else:
+                        continue
+            else:
+                print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:20}'.format(addr,port,protocol,service,' '.join(fprint))
+
+    print border
+
+def fingerprintSummary(keys,fprintfilter=None):
+    root_key_select = keys['hacktrack']
+    host_key_select = root_key_select['hosts']
+
+    width = blessings.Terminal().width
+    border = '=' * width
+    title = '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:20}\033[1;m'.format('Host','Port','Protocol','Service','Fingerprint')
+    print border
+    print title
+    print border
+    for addr in sortIPS(host_key_select.keys()):
+        ports = host_key_select[addr]['ports'].keys()
+        for port in sortPorts(ports):
+            service = host_key_select[addr]['ports'][port]['service']
+            fprint = host_key_select[addr]['ports'][port]['application']
+            protocol = host_key_select[addr]['ports'][port]['protocol']
+            if fprintfilter:
+                if fprintfilter in ' '.join(fprint) or fprintfilter.capitalize() in ' '.join(fprint) or fprintfilter.upper() in ' '.join(fprint):
+                    print '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:20}\033[1;m'.format(addr,port,protocol,service,' '.join(fprint))
                 else:
                     continue
             else:
-                print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:20}'.format(addr,port,protocol,service,' '.join(fprint))
+                print '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:20}\033[1;m'.format(addr,port,protocol,service,' '.join(fprint))
 
     print border
 
@@ -281,9 +308,9 @@ def htExec(pcmd,sfile,skeys):
 
     elif pcmd[0] == 'fprints':
         if len(pcmd) == 1:
-            print htHelp(type='fprints')
+            fingerprintSummary(skeys)
         elif len(pcmd) == 2:
-            fprintSummary(skeys,filter=pcmd[1])
+            fingerprintSummary(skeys,fprintfilter=pcmd[1])
         else:
             pass
 
@@ -299,7 +326,7 @@ def htShell(session_file,session_keys):
 
 def banner():
     os.system('clear')
-    banners = glob.glob('{}banners/*'.format(htconfig.HT_PATH))
+    banners = glob.glob('{}htbanners/*'.format(htconfig.HT_PATH))
     with open(random.choice(banners),'r') as banner:
         print banner.read()
 
