@@ -35,6 +35,8 @@ import json
 import blessings
 import random
 import readline
+import subprocess
+import re
 
 from htmodules import htconfig
 from htmodules import htparser
@@ -222,7 +224,7 @@ def serviceSummary(keys,servicelist=None):
             fprint = host_key_select[addr]['ports'][port]['application']
             protocol = host_key_select[addr]['ports'][port]['protocol']
             if servicelist:
-                for serv in servicelist:
+                for serv in sorted(servicelist):
                     if serv == service:
                         print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:20}'.format(addr,port,protocol,service,' '.join(fprint))
                     else:
@@ -249,7 +251,7 @@ def fingerprintSummary(keys,fprintfilter=None):
             fprint = host_key_select[addr]['ports'][port]['application']
             protocol = host_key_select[addr]['ports'][port]['protocol']
             if fprintfilter:
-                if fprintfilter in ' '.join(fprint) or fprintfilter.capitalize() in ' '.join(fprint) or fprintfilter.upper() in ' '.join(fprint):
+                if fprintfilter in ' '.join(fprint).upper() or fprintfilter in ' '.join(fprint).lower() or fprintfilter in ' '.join(fprint).capitalize():
                     print '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:20}\033[1;m'.format(addr,port,protocol,service,' '.join(fprint))
                 else:
                     continue
@@ -314,6 +316,7 @@ def htExec(pcmd,sfile,skeys):
         else:
             pass
 
+
 def htShell(session_file,session_keys):
     status = 0
     prompt = '[hacktrack]-> '
@@ -350,6 +353,7 @@ def indexSessions():
     else:
         return '{}\nSaved Sessions\n{}\n{}\n{}'.format('='*60,'='*60,'[--] No saved sessions available','='*60)
 
+
 def main():
     hacktrack_path = htconfig.HT_PATH
     parser = ArgumentParser(description='HackTrack | A tool to correlate and normalize data found within the raw output of tools used during a pentest engagement.')
@@ -369,4 +373,5 @@ def main():
         session = 'hacktrack_session_{}'.format(date.today())
         sessionkeys = sessionHandler('{}.htsessions/{}'.format(hacktrack_path,session))
         htShell('{}.htsessions/{}'.format(hacktrack_path,session),sessionkeys)
+
 main()

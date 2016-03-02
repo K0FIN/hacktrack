@@ -15,8 +15,21 @@ def loadRawData(file,keys):
             nmapkeys = nmapFile(file,keys)
             print '[<>] Nmap file data loaded.'
             return nmapkeys
+
+        elif '- Nikto v' in reader:
+            print '[<>] Nikto output detected.'
+            niktokeys = niktoFile(file,keys)
+            print '[<>] Nikto file data loaded.'
+            return niktokeys
+
         else:
             print '[--] File data not recognized.'
+
+def niktoFile(file,keys):
+    niktofile = loadRaw(file)
+    loaddata = niktofile.split('\n\n')
+    for data in loaddata:
+        print data
 
 def nmapFile(file,keys):
     nmapfile = loadRaw(file)
