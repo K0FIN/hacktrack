@@ -153,9 +153,37 @@ def htHelp(type=None):
         else:
             return "Command not understood."
 
+def formatHosts(list):
+    host_str = ''.join(list)
+    if '/' in host_str:
+        ip_range_list = IPNetwork(host_str).iter_hosts()
+        return map(str,ip_range_list)
+
+    if '-' in host_str:
+        iplist = []
+        split = ''.join(host_str).split('-')
+        start = split[0]
+        end = '{}.{}'.format('.'.join(start.split('.')[0:3]),split[1])
+        range = IPRange(start,end)
+        for ip in range:
+            iplist.append(str(ip))
+        return iplist
+
+    if ',' in host_str:
+        iplist = []
+        start = ''.join(host_str).split(',')
+        iplist.append(start[0])
+        tri_oct = '.'.join(start[0].split('.')[0:3])
+        single_oct = start[1:]
+
+        for oct in single_oct:
+            addr = '{}.{}'.format(tri_oct,oct)
+            iplist.append(addr)
+        return iplist
+    
 def hostSummary(keys,hosts=None):
     if hosts:
-        hosts = hosts
+        hosts = formatHosts(hosts)
     else:
         hosts = keys['hacktrack']['hosts'].keys()
     width = blessings.Terminal().width

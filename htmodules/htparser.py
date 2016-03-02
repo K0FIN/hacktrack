@@ -23,7 +23,7 @@ def loadRawData(file,keys):
             return niktokeys
 
         else:
-            print '[--] File data not recognized.'
+            return "[--] File could not be parsed."
 
 def niktoFile(file,keys):
     niktofile = loadRaw(file)
