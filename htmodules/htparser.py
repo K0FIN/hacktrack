@@ -60,4 +60,12 @@ def nmapFile(file,keys):
                 if len(obj.split()) > 3:
                     application = obj.split()[3:]
                 keys['hacktrack']['hosts'][host]['ports'].update({port:{'protocol':proto,'service':service,'application':application}})
+
+            if 'OSs:' in obj:
+                os = obj.split('OSs:')[1].split(';')[0].strip()
+                keys['hacktrack']['hosts'][host]['os'].update({'platform':os})
+
+            for k in keys['hacktrack']['hosts'].keys():
+                if not keys['hacktrack']['hosts'][k]['os']:
+                    keys['hacktrack']['hosts'][host]['os'].update({'platform':'Unknown'})
     return keys

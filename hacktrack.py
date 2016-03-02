@@ -153,13 +153,13 @@ def htHelp(type=None):
         else:
             return "Command not understood."
 
-def formatHosts(list):
-    host_str = ''.join(list)
+def formatHosts(hlist):
+    host_str = ''.join(hlist)
     if '/' in host_str:
         ip_range_list = IPNetwork(host_str).iter_hosts()
         return map(str,ip_range_list)
 
-    if '-' in host_str:
+    elif '-' in host_str:
         iplist = []
         split = ''.join(host_str).split('-')
         start = split[0]
@@ -169,7 +169,7 @@ def formatHosts(list):
             iplist.append(str(ip))
         return iplist
 
-    if ',' in host_str:
+    elif ',' in host_str:
         iplist = []
         start = ''.join(host_str).split(',')
         iplist.append(start[0])
@@ -180,7 +180,29 @@ def formatHosts(list):
             addr = '{}.{}'.format(tri_oct,oct)
             iplist.append(addr)
         return iplist
+
+    else:
+        return hlist
+
+def formatPorts(flist):
+    portstr = ''.join(flist)
+    if ',' in portstr:
+        portlist = portstr.split(',')
+        return portlist
+    elif '-' in portstr:
+        portlist = portstr.split('-')
+        if len(portlist) == 2:
+            convert = map(int,portlist)
+            portrange = range(convert[0],convert[1])
+            return portrange
+        else:
+            convert = map(int,portlist)
+            portrange = range(convert[0],convert.pop())
+            return portrange
     
+    else:
+        return flist
+
 def hostSummary(keys,hosts=None):
     if hosts:
         hosts = formatHosts(hosts)
@@ -190,20 +212,20 @@ def hostSummary(keys,hosts=None):
     border = '=' * width
     root_key_select = keys['hacktrack']
     host_key_select = root_key_select['hosts']
-    title = '\033[1;32m{0:16}\033[1;m | {1:6} | {2:10} | {3:15} | {4:20}'.format('Host','Port','Protocol','Service','Fingerprint')
+    title = '\033[1;32m{0:16}\033[1;m | {1:6} | {2:10} | {3:15} | {4:55} | {5:30}'.format('Host','Port','Protocol','Service','Fingerprint','Platform')
     print border
     print title
     print border
     for addr in sortIPS(hosts):
         if addr in host_key_select:
             ports = host_key_select[addr]['ports'].keys()
-            os = host_key_select[addr]['os']
+            platform = host_key_select[addr]['os']['platform']
             for port in sortPorts(ports):
                 port_key_select = host_key_select[addr]['ports'][port]
                 fprint = port_key_select['application']
                 service = port_key_select['service']
                 protocol = port_key_select['protocol']
-                print '\033[1;32m{0:16}\033[1;m | {1:6} | {2:10} | {3:15} | {4:20}'.format(addr,port,protocol,service,' '.join(fprint))
+                print '\033[1;32m{0:16}\033[1;m | {1:6} | {2:10} | {3:15} | {4:55} | {5:30}'.format(addr,port,protocol,service,' '.join(fprint),platform)
         else:
             continue
     print border               
@@ -220,7 +242,7 @@ def portSummary(keys,portlist=None):
     print border
     for addr in sortIPS(host_key_select.keys()):
         if portlist:
-            ports = portlist
+            ports = formatPorts(portlist)
         else:
             ports = host_key_select[addr]['ports'].keys()
        
