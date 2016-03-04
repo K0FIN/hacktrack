@@ -111,47 +111,20 @@ def checkSub(b,s):
         return 1
 
 def htCmdList():
-    htcmds = {'load':'Raw output file to load (Nmap)',
-            'banner':'Display a HackTrack banner',
-            'purge':'Purge HackTrack data (sessions,history)',
-            'history':'Show HackTrack command history',
-            'hosts':'Filter session data by host',
-            'ports':'Filter session data by port',
-            'services':'Filter session data by service type (http,smb,etc.)',
-            'fprints':'Filter session data by fingerprint (IIS 5.0,Tomcat,etc.)',
-            'creds':'Show saved credentials',
-            'sh':'Execute a shell command'
-            }
-
-    return htcmds
+    cmds = htconfig.HT_CMDS
+    return cmds
 
 def htHelp(type=None):
     fetchcmds = htCmdList()
-    helptitle = "HackTrack Command List"
-    helpstr = 'Run "help <cmd>" for more command help.'
-    frame = '=' * len(helpstr)
-    if type == None:
-        return '''
-{}
-{}
-
-({})
-{}
-- {}
-{}
-        '''.format(frame,helptitle,helpstr,frame,'\n- '.join(fetchcmds.keys()),frame)
-
+    base_cmds = fetchcmds.keys()
+    if type:
+        for base in base_cmds:
+            if base == type:
+                print base,fetchcmds[base]
+            else:
+                continue
     else:
-        if type in fetchcmds.keys():
-            return """
-======================================================
-           HackTrack Commands
-======================================================
-- {0:9} {1:1} {2:5}
-======================================================
-        """.format(type,'|',fetchcmds[type])
-        else:
-            return "Command not understood."
+        print base_cmds
 
 def formatHosts(hlist):
     host_str = ''.join(hlist)
@@ -203,6 +176,17 @@ def formatPorts(flist):
     else:
         return flist
 
+def formatServices(slist):
+    servicestr = ''.join(slist)
+    if ',' in servicestr:
+        servicelist = servicestr.split(',')
+        return servicelist
+    else:
+        return slist
+
+def uniqListCount(ulist):
+    return len(list(set(ulist)))
+
 def hostSummary(keys,hosts=None):
     if hosts:
         hosts = formatHosts(hosts)
@@ -212,7 +196,7 @@ def hostSummary(keys,hosts=None):
     border = '=' * width
     root_key_select = keys['hacktrack']
     host_key_select = root_key_select['hosts']
-    title = '\033[1;32m{0:16}\033[1;m | {1:6} | {2:10} | {3:15} | {4:55} | {5:30}'.format('Host','Port','Protocol','Service','Fingerprint','Platform')
+    title = '\033[1;32m{0:16}\033[1;m | {1:6} | {2:10} | {3:15} | {4:55} | {5:30}'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
     print border
     print title
     print border
@@ -236,7 +220,7 @@ def portSummary(keys,portlist=None):
 
     width = blessings.Terminal().width
     border = '=' * width
-    title = '{0:16} | \033[1;32m{1:6}\033[1;m | {2:10} | {3:15} | {4:20}'.format('Host','Port','Protocol','Service','Fingerprint')
+    title = '{0:16} | \033[1;32m{1:6}\033[1;m | {2:10} | {3:15} | {4:55} | {5:30}'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
     print border
     print title
     print border
@@ -245,14 +229,14 @@ def portSummary(keys,portlist=None):
             ports = formatPorts(portlist)
         else:
             ports = host_key_select[addr]['ports'].keys()
-       
+        platform = host_key_select[addr]['os']['platform']
         for port in sortPorts(ports):
             if port in host_key_select[addr]['ports'].keys():
                 port_key_select = host_key_select[addr]['ports'][port]
                 fprint = port_key_select['application']
                 service = port_key_select['service']
                 protocol = port_key_select['protocol']
-                print '{0:16} | \033[1;32m{1:6}\033[1;m | {2:10} | {3:15} | {4:20}'.format(addr,port,protocol,service,' '.join(fprint))
+                print '{0:16} | \033[1;32m{1:6}\033[1;m | {2:10} | {3:15} | {4:55} | {5:30}'.format(addr,port,protocol,service,' '.join(fprint),platform)
             else:
                 continue
     print border
@@ -263,24 +247,25 @@ def serviceSummary(keys,servicelist=None):
 
     width = blessings.Terminal().width
     border = '=' * width
-    title = '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:20}'.format('Host','Port','Protocol','Service','Fingerprint')
+    title = '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:55} | {5:30}'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
     print border
     print title
     print border
     for addr in sortIPS(host_key_select.keys()):
         ports = host_key_select[addr]['ports'].keys()
+        platform = host_key_select[addr]['os']['platform']
         for port in sortPorts(ports):
             service = host_key_select[addr]['ports'][port]['service']
             fprint = host_key_select[addr]['ports'][port]['application']
             protocol = host_key_select[addr]['ports'][port]['protocol']
             if servicelist:
-                for serv in sorted(servicelist):
+                for serv in sorted(formatServices(servicelist)):
                     if serv == service:
-                        print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:20}'.format(addr,port,protocol,service,' '.join(fprint))
+                        print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:55} | {5:30}'.format(addr,port,protocol,service,' '.join(fprint),platform)
                     else:
                         continue
             else:
-                print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:20}'.format(addr,port,protocol,service,' '.join(fprint))
+                print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:55} | {5:30}'.format(addr,port,protocol,service,' '.join(fprint),platform)
 
     print border
 
@@ -290,23 +275,51 @@ def fingerprintSummary(keys,fprintfilter=None):
 
     width = blessings.Terminal().width
     border = '=' * width
-    title = '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:20}\033[1;m'.format('Host','Port','Protocol','Service','Fingerprint')
+    title = '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:55}\033[1;m | {5:30}'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
     print border
     print title
     print border
     for addr in sortIPS(host_key_select.keys()):
         ports = host_key_select[addr]['ports'].keys()
+        platform = host_key_select[addr]['os']['platform']
         for port in sortPorts(ports):
             service = host_key_select[addr]['ports'][port]['service']
             fprint = host_key_select[addr]['ports'][port]['application']
             protocol = host_key_select[addr]['ports'][port]['protocol']
             if fprintfilter:
                 if fprintfilter in ' '.join(fprint).upper() or fprintfilter in ' '.join(fprint).lower() or fprintfilter in ' '.join(fprint).capitalize():
-                    print '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:20}\033[1;m'.format(addr,port,protocol,service,' '.join(fprint))
+                    print '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:55}\033[1;m | {5:30}'.format(addr,port,protocol,service,' '.join(fprint),platform)
                 else:
                     continue
             else:
-                print '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:20}\033[1;m'.format(addr,port,protocol,service,' '.join(fprint))
+                print '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:55}\033[1;m | {5:30}'.format(addr,port,protocol,service,' '.join(fprint),platform)
+
+    print border
+
+def platformSummary(keys,platformfilter=None):
+    root_key_select = keys['hacktrack']
+    host_key_select = root_key_select['hosts']
+
+    width = blessings.Terminal().width
+    border = '=' * width
+    title = '{0:16} | {1:6} | {2:10} | {3:15} | {4:55} | \033[1;32m{5:30}\033[1;m'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
+    print border
+    print title
+    print border
+    for addr in sortIPS(host_key_select.keys()):
+        ports = host_key_select[addr]['ports'].keys()
+        platform = host_key_select[addr]['os']['platform']
+        for port in sortPorts(ports):
+            service = host_key_select[addr]['ports'][port]['service']
+            fprint = host_key_select[addr]['ports'][port]['application']
+            protocol = host_key_select[addr]['ports'][port]['protocol']
+            if platformfilter:
+                if platformfilter in platform.upper() or platformfilter in platform.lower() or platformfilter in platform.capitalize():
+                    print '{0:16} | {1:6} | {2:10} | {3:15} | {4:55} | \033[1;32m{5:30}\033[1;m'.format(addr,port,protocol,service,' '.join(fprint),platform)
+                else:
+                    continue
+            else:
+                print '{0:16} | {1:6} | {2:10} | {3:15} | {4:55} | \033[1;32m{5:30}\033[1;m'.format(addr,port,protocol,service,' '.join(fprint),platform)
 
     print border
 
@@ -315,9 +328,9 @@ def htExec(pcmd,sfile,skeys):
 
     if pcmd[0] == 'help':
         if len(pcmd) == 1:
-            print htHelp()
+            htHelp()
         elif len(pcmd) == 2:
-            print htHelp(type=pcmd[1])
+            htHelp(type=pcmd[1])
         else:
             pass
 
@@ -366,6 +379,13 @@ def htExec(pcmd,sfile,skeys):
         else:
             pass
 
+    elif pcmd[0] == 'platforms':
+        if len(pcmd) == 1:
+            platformSummary(skeys)
+        elif len(pcmd) == 2:
+            platformSummary(skeys,platformfilter=pcmd[1])
+        else:
+            pass
 
 def htShell(session_file,session_keys):
     status = 0
@@ -405,6 +425,7 @@ def indexSessions():
 
 
 def main():
+    banner()
     hacktrack_path = htconfig.HT_PATH
     parser = ArgumentParser(description='HackTrack | A tool to correlate and normalize data found within the raw output of tools used during a pentest engagement.')
 
@@ -413,7 +434,6 @@ def main():
     args = parser.parse_args()
     session = args.session
 
-    banner()
     checkReqPaths()
 
     if session:
@@ -423,5 +443,6 @@ def main():
         session = 'hacktrack_session_{}'.format(date.today())
         sessionkeys = sessionHandler('{}.htsessions/{}'.format(hacktrack_path,session))
         htShell('{}.htsessions/{}'.format(hacktrack_path,session),sessionkeys)
+
 
 main()
