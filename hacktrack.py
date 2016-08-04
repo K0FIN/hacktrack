@@ -1,14 +1,14 @@
 #!/usr/bin/python2
 
 ######################################################################
-#    __  __           __  ______                __  
+#    __  __           __  ______                __
 #   / / / /___ ______/ /_/_  __/________ ______/ /__
 #  / /_/ / __ `/ ___/ //_// / / ___/ __ `/ ___/ //_/
-# / __  / /_/ / /__/ ,<  / / / /  / /_/ / /__/ ,<   
+# / __  / /_/ / /__/ ,<  / / / /  / /_/ / /__/ ,<
 #/_/ /_/\__,_/\___/_/|_|/_/ /_/   \__,_/\___/_/|_|
 #
 ######################################################################
-#HackTrack | A tool to correlate and normalize data found within the 
+#HackTrack | A tool to correlate and normalize data found within the
 #            raw output of tools used during a pentesting engagement.
 
 
@@ -196,7 +196,7 @@ def hostSummary(keys,hosts=None):
     border = '=' * width
     root_key_select = keys['hacktrack']
     host_key_select = root_key_select['hosts']
-    title = '\033[1;32m{0:16}\033[1;m | {1:6} | {2:10} | {3:15} | {4:55} | {5:30}'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
+    title = '\033[1;32m{0:16}\033[1;m | {1:6} | {2:10} | {3:15} | {4:55} | {5:20}'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
     print border
     print title
     print border
@@ -209,10 +209,10 @@ def hostSummary(keys,hosts=None):
                 fprint = port_key_select['application']
                 service = port_key_select['service']
                 protocol = port_key_select['protocol']
-                print '\033[1;32m{0:16}\033[1;m | {1:6} | {2:10} | {3:15} | {4:55} | {5:30}'.format(addr,port,protocol,service,' '.join(fprint),platform)
+                print '\033[1;32m{0:16}\033[1;m | {1:6} | {2:10} | {3:15} | {4:55} | {5:20}'.format(addr,port,protocol,service,' '.join(fprint),platform)
         else:
             continue
-    print border               
+    print border
 
 def portSummary(keys,portlist=None):
     root_key_select = keys['hacktrack']
@@ -220,7 +220,7 @@ def portSummary(keys,portlist=None):
 
     width = blessings.Terminal().width
     border = '=' * width
-    title = '{0:16} | \033[1;32m{1:6}\033[1;m | {2:10} | {3:15} | {4:55} | {5:30}'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
+    title = '{0:16} | \033[1;32m{1:6}\033[1;m | {2:10} | {3:15} | {4:55} | {5:20}'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
     print border
     print title
     print border
@@ -236,7 +236,7 @@ def portSummary(keys,portlist=None):
                 fprint = port_key_select['application']
                 service = port_key_select['service']
                 protocol = port_key_select['protocol']
-                print '{0:16} | \033[1;32m{1:6}\033[1;m | {2:10} | {3:15} | {4:55} | {5:30}'.format(addr,port,protocol,service,' '.join(fprint),platform)
+                print '{0:16} | \033[1;32m{1:6}\033[1;m | {2:10} | {3:15} | {4:55} | {5:20}'.format(addr,port,protocol,service,' '.join(fprint),platform)
             else:
                 continue
     print border
@@ -247,7 +247,7 @@ def serviceSummary(keys,servicelist=None):
 
     width = blessings.Terminal().width
     border = '=' * width
-    title = '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:55} | {5:30}'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
+    title = '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:55} | {5:20}'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
     print border
     print title
     print border
@@ -261,11 +261,11 @@ def serviceSummary(keys,servicelist=None):
             if servicelist:
                 for serv in sorted(formatServices(servicelist)):
                     if serv == service:
-                        print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:55} | {5:30}'.format(addr,port,protocol,service,' '.join(fprint),platform)
+                        print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:55} | {5:20}'.format(addr,port,protocol,service,' '.join(fprint),platform)
                     else:
                         continue
             else:
-                print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:55} | {5:30}'.format(addr,port,protocol,service,' '.join(fprint),platform)
+                print '{0:16} | {1:6} | {2:10} | \033[1;32m{3:15}\033[1;m | {4:55} | {5:20}'.format(addr,port,protocol,service,' '.join(fprint),platform)
 
     print border
 
@@ -275,7 +275,7 @@ def fingerprintSummary(keys,fprintfilter=None):
 
     width = blessings.Terminal().width
     border = '=' * width
-    title = '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:55}\033[1;m | {5:30}'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
+    title = '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:55}\033[1;m | {5:20}'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
     print border
     print title
     print border
@@ -288,11 +288,11 @@ def fingerprintSummary(keys,fprintfilter=None):
             protocol = host_key_select[addr]['ports'][port]['protocol']
             if fprintfilter:
                 if fprintfilter in ' '.join(fprint).upper() or fprintfilter in ' '.join(fprint).lower() or fprintfilter in ' '.join(fprint).capitalize():
-                    print '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:55}\033[1;m | {5:30}'.format(addr,port,protocol,service,' '.join(fprint),platform)
+                    print '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:55}\033[1;m | {5:20}'.format(addr,port,protocol,service,' '.join(fprint),platform)
                 else:
                     continue
             else:
-                print '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:55}\033[1;m | {5:30}'.format(addr,port,protocol,service,' '.join(fprint),platform)
+                print '{0:16} | {1:6} | {2:10} | {3:15} | \033[1;32m{4:55}\033[1;m | {5:20}'.format(addr,port,protocol,service,' '.join(fprint),platform)
 
     print border
 
@@ -302,7 +302,7 @@ def platformSummary(keys,platformfilter=None):
 
     width = blessings.Terminal().width
     border = '=' * width
-    title = '{0:16} | {1:6} | {2:10} | {3:15} | {4:55} | \033[1;32m{5:30}\033[1;m'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
+    title = '{0:16} | {1:6} | {2:10} | {3:15} | {4:55} | \033[1;32m{5:20}\033[1;m'.format('Hosts','Ports','Protocols','Services','Fingerprints','Platforms')
     print border
     print title
     print border
@@ -315,11 +315,11 @@ def platformSummary(keys,platformfilter=None):
             protocol = host_key_select[addr]['ports'][port]['protocol']
             if platformfilter:
                 if platformfilter in platform.upper() or platformfilter in platform.lower() or platformfilter in platform.capitalize():
-                    print '{0:16} | {1:6} | {2:10} | {3:15} | {4:55} | \033[1;32m{5:30}\033[1;m'.format(addr,port,protocol,service,' '.join(fprint),platform)
+                    print '{0:16} | {1:6} | {2:10} | {3:15} | {4:55} | \033[1;32m{5:20}\033[1;m'.format(addr,port,protocol,service,' '.join(fprint),platform)
                 else:
                     continue
             else:
-                print '{0:16} | {1:6} | {2:10} | {3:15} | {4:55} | \033[1;32m{5:30}\033[1;m'.format(addr,port,protocol,service,' '.join(fprint),platform)
+                print '{0:16} | {1:6} | {2:10} | {3:15} | {4:55} | \033[1;32m{5:20}\033[1;m'.format(addr,port,protocol,service,' '.join(fprint),platform)
 
     print border
 

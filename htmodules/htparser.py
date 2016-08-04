@@ -9,7 +9,7 @@ def loadRaw(file):
 
 def loadRawData(file,keys):
     with open(file,'r') as loadfile:
-        reader = loadfile.read()
+        reader = loadfile.read().strip()
         if 'Starting Nmap' and  '( https://nmap.org )' in reader:
             print '[<>] Nmap output detected.'
             nmapkeys = nmapFile(file,keys)
@@ -50,7 +50,7 @@ def nmapFile(file,keys):
                 continue
 
             if obj.startswith('Nmap scan report for'):
-                host = obj.split().pop()
+                host = obj.split().pop().replace('(','').replace(')','')
                 keys['hacktrack']['hosts'].update({host:{'ports':{},'os':{}}})
 
             if obj.split()[1] == 'open':
